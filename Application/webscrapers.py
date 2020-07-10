@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import time
+import pandas as pd
 
 
 # Classe para web scraping do site Mercado Livre
@@ -9,6 +10,17 @@ class MLWebScraper:
 
         # O site Mercado Livre lista 48 itens por página
         self.__items_per_page__ = 48
+
+    
+    def remove_city_zone(self, city):
+
+            zone_list = ['Zona Sul', 'Zona Leste', 'Zona Norte', 'Zona Oeste', 'Centro']
+
+            for zone in zone_list:
+                if zone in city: 
+                    city = city.replace(zone, '').strip()
+
+            return city
 
     
     def get_urls(self, base_url, search_filters):
@@ -38,10 +50,9 @@ class MLWebScraper:
              print('URL inválida.')
 
         return urls
-
     
     def get_data(self, url):
-        data = []
+        data = pd.DataFrame(columns=['item_title', 'item_attrs', 'item_location', 'item_currency', 'item_price'])
 
         try:
             response = requests.get(url)
@@ -54,22 +65,23 @@ class MLWebScraper:
             items = soup.findAll ("div", { "class" : "item__info" })
 
 
-            # Para cada item, adiciona seus dados num dicionário, 
-            # fazendo ainda o primeiro tratamento dos dados.
-            # Em seguida todos os itens são salvos numa lista
+            # Para cada item, adiciona seus dados num dataframe, 
+            # fazendo ainda um tratamento básico de strings.
             for i in range(len(items)) :
-
-                item_dict = {'item_title' : items[i].find("span", { "class" : "main-title" }).get_text().strip(),
+                
+                data = data.append({'item_title' : items[i].find("span", { "class" : "main-title" }).get_text().strip(),
                     'item_attrs' : items[i].find("div", { "class" : "item__attrs" }).get_text().strip(),
-                    'item_location' : items[i].find("div", { "class" : "item__location" }).get_text().strip(),
+                    'item_location' : self.remove_city_zone(items[i].find("div", { "class" : "item__location" }).get_text().strip()),
                     'item_currency' : items[i].find("span", { "class" : "price__symbol" }).get_text(),
-                    'item_price': items[i].find("span", { "class" : "price__fraction" }).get_text().replace('.','')}
-
-                data.append(item_dict)
+                    'item_price': items[i].find("span", { "class" : "price__fraction" }).get_text().replace('.','')}, ignore_index=True)
+         
         
-        except:
-            print('URL inválida.')
+        except Exception as e:
+            print(str(e))
 
         return data
+        
 
+
+        
     
