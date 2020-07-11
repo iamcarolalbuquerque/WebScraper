@@ -10,6 +10,7 @@ mlws = MLWebScraper()
 data = pd.DataFrame()
 
 # Obtém as urls da paginação do site
+# Esse método é propositalmente lento para evitar que o site nos marque como spammers :)
 urls = mlws.get_urls(base_url,search_filter)
 
 # Obtém os dados relevantes itens ofertados
@@ -17,7 +18,10 @@ for url in urls:
     data = data.append(mlws.get_data(url))
 
 
-print(data[['item_title', 'item_location', 'item_price']])
+# print(data[['name', 'city', 'price']])
+# print(data['city'].drop_duplicates().sort_values())
 
-# print(data['item_location'].drop_duplicates().sort_values())
+data[['name', 'city', 'price']].to_csv('../products.csv', index=False)
+
+
     

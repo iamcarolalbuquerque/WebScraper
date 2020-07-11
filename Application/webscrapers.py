@@ -52,7 +52,7 @@ class MLWebScraper:
         return urls
     
     def get_data(self, url):
-        data = pd.DataFrame(columns=['item_title', 'item_attrs', 'item_location', 'item_currency', 'item_price'])
+        data = pd.DataFrame(columns=['name', 'attrs', 'city', 'currency', 'price'])
 
         try:
             response = requests.get(url)
@@ -69,11 +69,11 @@ class MLWebScraper:
             # fazendo ainda um tratamento básico de strings.
             for i in range(len(items)) :
                 
-                data = data.append({'item_title' : items[i].find("span", { "class" : "main-title" }).get_text().strip(),
-                    'item_attrs' : items[i].find("div", { "class" : "item__attrs" }).get_text().strip(),
-                    'item_location' : self.remove_city_zone(items[i].find("div", { "class" : "item__location" }).get_text().strip()),
-                    'item_currency' : items[i].find("span", { "class" : "price__symbol" }).get_text(),
-                    'item_price': items[i].find("span", { "class" : "price__fraction" }).get_text().replace('.','')}, ignore_index=True)
+                data = data.append({'name' : items[i].find("span", { "class" : "main-title" }).get_text().strip(),
+                    'attrs' : items[i].find("div", { "class" : "item__attrs" }).get_text().strip(),
+                    'city' : self.remove_city_zone(items[i].find("div", { "class" : "item__location" }).get_text().strip()),
+                    'currency' : items[i].find("span", { "class" : "price__symbol" }).get_text(),
+                    'price': items[i].find("span", { "class" : "price__fraction" }).get_text().replace('.','')}, ignore_index=True)
          
         
         except Exception as e:
